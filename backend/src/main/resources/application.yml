@@ -1,0 +1,14 @@
+# mysql
+spring:
+  datasource:
+    driverClassName:  com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://b3f54f4bf2ad96:2ded215a@us-cdbr-east-03.cleardb.com/heroku_475d22332fe168e?reconnect=true
+    username: b3f54f4bf2ad96
+    password: 2ded215a
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: edu.neu.fitnesspal.dao
+
+server:
+  port: 9000
