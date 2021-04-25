@@ -40,7 +40,7 @@
 
     <update id="editUser">
         UPDATE easyuser SET username = #{username} , password = #{password} ,
-        email = #{email} WHERE id = #{id}
+        email = #{email} , role = #{role} , state = #{state} WHERE id = #{id}
     </update>
 
     <delete id="deleteUser">
