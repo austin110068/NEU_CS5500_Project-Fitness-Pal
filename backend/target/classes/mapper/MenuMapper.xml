@@ -4,6 +4,7 @@
 
 <mapper namespace="edu.neu.fitnesspal.dao.MenuDao">
     <!--映射实体-->
+    <!-- 用来描述一对多的关系-->
     <resultMap id="menuMap" type="edu.neu.fitnesspal.bean.MainMenu">
         <id column="id"  property="id"></id>
         <result column="title"  property="title"></result>
