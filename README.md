@@ -7,6 +7,7 @@ My Fitness Pal builds on **Vue.js** front-end framework. Servers are based on **
 
 ## Project Website
 [My Fitness Pal](https://pages.github.ccs.neu.edu/2021SPCS5500SB/project-fitness_pal/)
+https://my-finess-pal.herokuapp.com/#/login
 
 ## Contact
 * Chienyu Chen chen.chieny@northeastern.edu
