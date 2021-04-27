@@ -3,9 +3,9 @@
         <el-header>
             <div>
                 <img src="../assets/logo.jpg" >
-                <span>个人运动平台</span>
+                <span>Personal Fitness Platform</span>
             </div>
-            <el-button type="info" @click="logout">安全退出</el-button>
+            <el-button type="info" @click="logout">Exit</el-button>
         </el-header>
         <el-container>
             <el-aside :width="isCollapse? '64px' : '200px'">
@@ -25,7 +25,7 @@
                             <i :class="iconsObject[item.id]"></i>
                             <span>{{item.title}}</span>
                         </template>
-                        <el-menu-item :index="it.path" v-for="it in item.sList" :key="it.id" @click="saveNavState(it.path)">
+                        <el-menu-item :index="it.path" v-for="it in item.slist" :key="it.id" @click="saveNavState(it.path)">
                             <template slot="title">
                             <i :class="iconsObject[it.id]"></i>
                             <span>{{it.title}}</span>
@@ -71,10 +71,10 @@ export default {
             this.$router.push("/login");
         },
         async getMenuList() {
-            const { data: res } = await this.$http.get("menu");
+            const { data: res } = await this.$http.get("menus");
             console.log(res);
-            if (res.status != 200) return this.$message.error("获取列表失败！！！");
-            this.menuList = res.menuList;
+            if (res.status != 200) return this.$message.error("Failed to fetch data");
+            this.menuList = res.data;
 
         },
         toggleCollapse() {

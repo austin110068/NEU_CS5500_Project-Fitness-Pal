@@ -105,7 +105,7 @@ export default {
     margin: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-around;
     background: white;
     align-items: center;
     min-width: 40%;

@@ -1,39 +1,29 @@
 <template>
-    <div>用户列表
+    <div>
+        <h1>Role Management</h1>
         <!-- 面包屑导航 -->
         <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>权限管理</el-breadcrumb-item>
-        <el-breadcrumb-item>用户列表</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/home' }">Main</el-breadcrumb-item>
+        <el-breadcrumb-item>Auth Management</el-breadcrumb-item>
+        <el-breadcrumb-item>Role Management</el-breadcrumb-item>
         </el-breadcrumb>
         <el-card>
-            <el-row :gutter="25" type="flex" justify="center" align="middle">
-                <el-col :span="10">
-                    <el-input placeholder="请输入搜索内容" v-model="queryInfo.query" clearable @clear="getUserList">
-                        <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
-                    </el-input>
-                </el-col>
-                <el-col :span="4">
-                    <el-button type="primary" @click="toggleAddDialogVisible">添加用户</el-button>
-                </el-col>
-            </el-row>
             <el-table :data="userList" border stripe :header-cell-style="{textAlign: 'center'}" :cell-style="{ textAlign: 'center' }"> >
                 <el-table-column type="index"></el-table-column>
-                <el-table-column label="用户名" prop="username"></el-table-column>
-                <el-table-column label="邮箱" prop="email"></el-table-column>
-                <el-table-column label="密码" prop="password"></el-table-column>
-                <el-table-column label="角色" prop="role"></el-table-column>
-                <el-table-column label="状态" prop="state">
-                    <template slot-scope="scope">
-                        {{scope.row}}
-                        <el-switch v-model="scope.row.state" @change="userStateChanged(scope.row)"></el-switch>
-                    </template>
-                </el-table-column>
-                <el-table-column label="操作">
+                <el-table-column label="Username" prop="username"></el-table-column>
+                <el-table-column label="Email" prop="email"></el-table-column>
+                <el-table-column label="Password" prop="password"></el-table-column>
+                <el-table-column label="Role" prop="role"></el-table-column>
+                <el-table-column label="Action">
                     <template slot-scope="scope" class="auth">
                         <!-- 权限 -->
-                        <el-tooltip effect="dark" content="分配权限" placement="top-start" :enterable="false"><!--文字提示 enterable 隐藏-->
-                        <el-button type="warning" icon="el-icon-setting" size="mini"></el-button>
+                        <el-tooltip effect="dark" content="determine access level" placement="top-start" :enterable="false"><!--文字提示 enterable 隐藏-->
+                        <select v-model="userList[scope.$index].selected" @change="clickType(scope.$index)">
+                                <option disabled value="">Please select one</option>
+                                    <option>superadmin</option>
+                                    <option>admin</option>
+                                    <option>user</option>
+                        </select>
                         </el-tooltip>
                     </template>
                 </el-table-column>
@@ -51,39 +41,39 @@
             </div>
         </el-card>
 
-        <el-dialog title="添加用户" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
+        <el-dialog title="Add User" :visible.sync="addDialogVisible" width="50%" @close="addDialogClosed">
             <el-form :model="addForm" :rules="addFormRules" ref="addFormRef" label-width="70px">
-                <el-form-item label="用户名" prop="username">
+                <el-form-item label="Username" prop="username">
                     <el-input v-model="addForm.username"></el-input>
                 </el-form-item>
-                <el-form-item label="密码" prop="password">
+                <el-form-item label="Password" prop="password">
                     <el-input v-model="addForm.password"></el-input>
                 </el-form-item>
-                <el-form-item label="邮箱" prop="email">
+                <el-form-item label="Email" prop="email">
                     <el-input v-model="addForm.email"></el-input>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="addDialogVisible = false">取消</el-button>
-                <el-button type="primary" @click="addUser">确定</el-button>
+                <el-button @click="addDialogVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="addUser">Confirm</el-button>
             </span>
         </el-dialog>
 
-        <el-dialog title="修改用户信息" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
+        <el-dialog title="Edit user info" :visible.sync="editDialogVisible" width="50%" @close="editDialogClosed">
             <el-form :model="editForm" :rules="editFormRules" ref="editFormRef" label-width="70px">
-                <el-form-item label="用户名" prop="username">
+                <el-form-item label="Username" prop="username">
                     <el-input v-model="editForm.username" disabled></el-input>
                 </el-form-item>
-                <el-form-item label="密码" prop="password">
+                <el-form-item label="Password" prop="password">
                     <el-input v-model="editForm.password"></el-input>
                 </el-form-item>
-                <el-form-item label="邮箱" prop="email">
+                <el-form-item label="Email" prop="email">
                     <el-input v-model="editForm.email"></el-input>
                 </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button @click="editDialogVisible = false">取消</el-button>
-                <el-button type="primary" @click="editUserInfo">确定</el-button>
+                <el-button @click="editDialogVisible = false">Cancel</el-button>
+                <el-button type="primary" @click="editUserInfo">Confirm</el-button>
             </span>
         </el-dialog>
     </div>
@@ -112,31 +102,32 @@ export default {
             editForm: {
 
             },
+            selected: '',
             editDialogVisible: false,
-            addFormRules: {
-                username: [
-                    { required: true, message: '请输入用户名', trigger: 'blur' },
-                    { min: 5, max: 8, message: '长度在 5 到 8 个字符', trigger: 'blur' }
-                ],
-                password: [
-                    { required: true, message: '请输入密码', trigger: 'blur' },
-                    { min: 6, max: 8, message: '长度在 6 到 8 个字符', trigger: 'blur' }
-                ],
-                email: [
-                    { required: true, message: '请输入邮箱', trigger: 'blur' },
-                    { min: 5, max: 15, message: '请输入正确的邮箱地址', trigger: 'blur' }
-                ],
-            },
-            editFormRules: {
-                password: [
-                    { required: true, message: '请输入密码', trigger: 'blur' },
-                    { min: 6, max: 8, message: '长度在 6 到 8 个字符', trigger: 'blur' }
-                ],
-                email: [
-                    { required: true, message: '请输入邮箱', trigger: 'blur' },
-                    { min: 5, max: 15, message: '请输入正确的邮箱地址', trigger: 'blur' }
-                ],
-            },
+          addFormRules: {
+            username: [
+              { required: true, message: 'Please input Username', trigger: 'blur' },
+              { min: 5, max: 8, message: '5 ~ 8 characters', trigger: 'blur' }
+            ],
+            password: [
+              { required: true, message: 'Please input password', trigger: 'blur' },
+              { min: 6, max: 8, message: '6 ~ 8 characters', trigger: 'blur' }
+            ],
+            email: [
+              { required: true, message: 'Please input email address', trigger: 'blur' },
+              { min: 5, max: 15, message: 'Please type in correct email address', trigger: 'blur' }
+            ],
+          },
+          editFormRules: {
+            password: [
+              { required: true, message: 'Please input password', trigger: 'blur' },
+              { min: 6, max: 8, message: '6 ~ 8 characters', trigger: 'blur' }
+            ],
+            email: [
+              { required: true, message: 'Please input email address', trigger: 'blur' },
+              { min: 5, max: 15, message: 'Please type in correct email address', trigger: 'blur' }
+            ],
+          },
         }
     },
     methods: {
@@ -145,27 +136,43 @@ export default {
             this.userList = res.data;
             this.total = res.numbers;
         },
+
+        userStateChanged(newUser) {
+            const { data:res } = this.$http.post('/editUser', newUser, {
+            headers: {
+                'Content-Type': 'application/json',
+            }});
+            // this.$http.put(`userState?id=${userInfo.id}&state=${userInfo.state}`);
+            if (typeof res != 'undefined') {
+                userInfo.id = !userInfo.id;
+                return this.$message.error("Failed to change user state!");
+            }
+            this.$message.success("Success!")
+            location.reload()
+        },
+
+        clickType(index) {
+            let newUser = {
+                'username': this.userList[index].username,
+                "role": this.userList[index].selected,
+                "state": this.userList[index].state,
+                "email": this.userList[index].email,
+                "password": this.userList[index].password,
+                "id": this.userList[index].id
+            }
+            this.userStateChanged(newUser)
+        },
+
         handleSizeChange(newSize) {
             this.queryInfo.pageSize = newSize;
             this.getUserList();
         },
+
         handleCurrentChange(newPage) {
             this.queryInfo.pageNum = newPage;
             this.getUserList();
         },
-        async userStateChanged(userInfo) {
-            var formData = new FormData();
-            formData.append('id', userInfo.id);
-            formData.append('state', userInfo.state);
-            const { data:res } = this.$http.put('/userState', formData);
-            // this.$http.put(`userState?id=${userInfo.id}&state=${userInfo.state}`);
-            console.log(res);
-            if (typeof res != 'undefined') {
-                userInfo.id = !userInfo.id;
-                return this.$message.error("操作失败！！！");
-            }
-            this.$message.success("操作成功！！！")
-        },
+
         addDialogClosed() {
             this.$refs.addFormRef.resetFields();
         },
@@ -174,9 +181,9 @@ export default {
                 if (!valid) return;
                 const { data:res } = await this.$http.post("addUser", this.addForm);
                 if (res != "success") {
-                    return this.$message.error("操作失败！！！");
+                    return this.$message.error("Failed to add user!");
                 }
-                this.$message.success("操作成功！！！")
+                this.$message.success("Success!")
                 this.addDialogVisible = false;
                 this.getUserList();
             });
@@ -185,19 +192,19 @@ export default {
             this.addDialogVisible = !this.addDialogVisible;
         },
         async deleteUser(id) {
-            const confirmResult = await this.$confirm('此操作将永久删除用户，是否继续？', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
+            const confirmResult = await this.$confirm('This action will delete user permanently, click to continue.', 'Reminder', {
+                confirmButtonText: 'Confirm',
+                cancelButtonText: 'Cancel',
                 type: 'warning'
             }).catch(err => err);
             if (confirmResult != 'confirm') {
-                return this.$message.Info("已取消删除");
+                return this.$message.Info("Cancelled");
             }
             const { data:res } = await this.$http.delete("deleteUser?id=" + id);
             if (res != "success") {
-                return this.$message.error("删除失败！");
+                return this.$message.error("Failed to delete user!");
             }
-            this.$message.success("删除成功！");
+            this.$message.success("Success!");
             this.getUserList();
         },
         async showEditDialog(id) {
@@ -213,9 +220,9 @@ export default {
                 if (!valid) return;
                 const { data:res} = await this.$http.put("editUser", this.editForm);
                 if (res != "success") {
-                    return this.$message.error("操作失败！");
+                    return this.$message.error("Failed to edit user!");
                 }
-                this.$message.success("操作成功！");
+                this.$message.success("Success!");
                 this.editDialogVisible = false;
                 this.getUserList();
             });
